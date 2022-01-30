@@ -1,4 +1,4 @@
-package ru.job4j.job4j_chat;
+package ru.job4j_chat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
