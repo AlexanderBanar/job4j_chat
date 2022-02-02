@@ -11,12 +11,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 @RestController
 @RequestMapping("/person")
 public class PersonController {
     private final PersonRepo persons;
+    private BCryptPasswordEncoder encoder;
 
-    public PersonController(final PersonRepo persons) {
+    public PersonController(final PersonRepo persons,
+                            BCryptPasswordEncoder encoder) {
+        this.encoder = encoder;
         this.persons = persons;
     }
 
@@ -26,6 +31,13 @@ public class PersonController {
                 this.persons.save(Person.of(name)),
                 HttpStatus.CREATED
         );
+    }
+
+    @PostMapping("/sign-up")
+    public void signUp(@RequestParam String name, @RequestParam String password) {
+        Person person = Person.of(name);
+        person.setPassword(encoder.encode(password));
+        this.persons.save(person);
     }
 
     @GetMapping("/")

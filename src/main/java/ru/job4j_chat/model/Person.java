@@ -11,6 +11,7 @@ public class Person {
     private int id;
 
     private String name;
+    private String password;
 
     public static Person of (String name) {
         Person person = new Person();
@@ -32,6 +33,14 @@ public class Person {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override

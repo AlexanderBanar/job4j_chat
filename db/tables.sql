@@ -17,3 +17,8 @@ create table messages(
                          person_id int references persons(id),
                          room_id int references rooms(id)
 );
+
+alter table persons add column password varchar;
+delete from messages;
+delete from rooms;
+delete from persons;
