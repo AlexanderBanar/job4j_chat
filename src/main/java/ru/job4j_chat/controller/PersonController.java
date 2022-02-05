@@ -3,6 +3,7 @@ package ru.job4j_chat.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j_chat.model.Person;
 import ru.job4j_chat.repository.PersonRepo;
 
@@ -27,6 +28,9 @@ public class PersonController {
 
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestParam String name) {
+        if (name == null) {
+            throw new NullPointerException("Name must not be empty");
+        }
         return new ResponseEntity<>(
                 this.persons.save(Person.of(name)),
                 HttpStatus.CREATED
@@ -35,6 +39,9 @@ public class PersonController {
 
     @PostMapping("/sign-up")
     public void signUp(@RequestParam String name, @RequestParam String password) {
+        if (name == null || password == null) {
+            throw new NullPointerException("Name or password must not be empty");
+        }
         Person person = Person.of(name);
         person.setPassword(encoder.encode(password));
         this.persons.save(person);
@@ -48,16 +55,18 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Person> findById(@PathVariable int id) {
-        var person = this.persons.findById(id);
-        return new ResponseEntity<>(
-                person.orElse(new Person()),
-                person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+    public Person findById(@PathVariable int id) {
+        return this.persons.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Person not found, please check its id"
+                ));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> update(@RequestParam String newName, @PathVariable int id) {
+        if (newName == null || id == 0) {
+            throw new NullPointerException("NewName or personId must not be empty or 0");
+        }
         Optional personOpt = persons.findById(id);
         if (personOpt.isPresent()) {
             Person person = (Person) personOpt.get();
@@ -71,6 +80,9 @@ public class PersonController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
+        if (id == 0) {
+            throw new NullPointerException("PersonId must not be 0");
+        }
         Person person = new Person();
         person.setId(id);
         this.persons.delete(person);

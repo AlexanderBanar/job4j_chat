@@ -3,6 +3,7 @@ package ru.job4j_chat.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j_chat.model.Person;
 import ru.job4j_chat.model.Room;
 import ru.job4j_chat.repository.PersonRepo;
@@ -26,6 +27,9 @@ public class RoomController {
 
     @PostMapping("/")
     public ResponseEntity<Room> create(@RequestParam String description, @RequestParam int personId) {
+        if (description == null || personId == 0) {
+            throw new NullPointerException("Description or personId must not be empty or 0");
+        }
         Room room = Room.of(description);
         Optional personOpt = persons.findById(personId);
         if (personOpt.isPresent()) {
@@ -51,16 +55,18 @@ public class RoomController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Room> findById(@PathVariable int id) {
-        var room = this.rooms.findById(id);
-        return new ResponseEntity<>(
-                room.orElse(new Room()),
-                room.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
-        );
+    public Room findById(@PathVariable int id) {
+        return this.rooms.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Room not found, please check its id"
+                ));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> update(@RequestParam String newDescription, @PathVariable int id) {
+        if (newDescription == null || id == 0) {
+            throw new NullPointerException("NewDescription or roomId must not be empty or 0");
+        }
         Optional roomOpt = rooms.findById(id);
         if (roomOpt.isPresent()) {
             Room room = (Room) roomOpt.get();
@@ -74,6 +80,9 @@ public class RoomController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
+        if (id == 0) {
+            throw new NullPointerException("RoomId must not be 0");
+        }
         Room room = new Room();
         room.setId(id);
         this.rooms.delete(room);
