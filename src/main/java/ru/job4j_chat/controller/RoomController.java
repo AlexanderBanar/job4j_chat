@@ -78,6 +78,33 @@ public class RoomController {
         }
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> patch(@RequestBody Room room, @PathVariable int id) {
+        Room roomPatched;
+        Person updatedPerson;
+        Optional roomPatchedOpt = rooms.findById(id);
+        if (roomPatchedOpt.isPresent()) {
+            roomPatched = (Room) roomPatchedOpt.get();
+        } else {
+            throw new NullPointerException("RoomId is incorrect");
+        }
+        if (room.getPerson() != null) {
+            if (room.getPerson().getId() == 0) {
+                throw new NullPointerException("PersonId inside Room cannot be 0");
+            } else {
+                Optional updatedPersonOpt = persons.findById(room.getPerson().getId());
+                if (updatedPersonOpt.isEmpty()) {
+                    throw new NullPointerException("PersonId inside Room is incorrect");
+                } else {
+                    updatedPerson = (Person) updatedPersonOpt.get();
+                    roomPatched.setPerson(updatedPerson);
+                    rooms.save(roomPatched);
+                }
+            }
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable int id) {
         if (id == 0) {

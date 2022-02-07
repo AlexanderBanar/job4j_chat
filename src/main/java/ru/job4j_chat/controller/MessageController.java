@@ -17,9 +17,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 @RestController
 @RequestMapping("/message")
@@ -87,6 +91,44 @@ public class MessageController {
         Message message = (Message) messageOpt.get();
         message.setText(newText);
         this.messages.save(message);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> patch(@RequestBody Message message, @PathVariable int id) {
+        Message messagePatched;
+        Person updatedPerson;
+        Room updatedRoom;
+        Optional messagePatchedOpt = messages.findById(id);
+        if (messagePatchedOpt.isPresent()) {
+            messagePatched = (Message) messagePatchedOpt.get();
+        } else {
+            throw new NullPointerException("MessageId is incorrect");
+        }
+        if (message.getPerson() != null) {
+            if (message.getPerson().getId() == 0) {
+                throw new NullPointerException("PersonId must not be 0 inside Message entity");
+            } else {
+                Optional personOpt = persons.findById(message.getPerson().getId());
+                if (personOpt.isPresent()) {
+                    updatedPerson = (Person) personOpt.get();
+                    messagePatched.setPerson(updatedPerson);
+                    messages.save(messagePatched);
+                }
+            }
+        }
+        if (message.getRoom() != null) {
+            if (message.getRoom().getId() == 0) {
+                throw new NullPointerException("RoomId must not be 0 inside Message entity");
+            } else {
+                Optional roomOpt = rooms.findById(message.getRoom().getId());
+                if (roomOpt.isPresent()) {
+                    updatedRoom = (Room) roomOpt.get();
+                    messagePatched.setRoom(updatedRoom);
+                    messages.save(messagePatched);
+                }
+            }
+        }
         return ResponseEntity.ok().build();
     }
 
