@@ -1,6 +1,7 @@
 package ru.job4j_chat.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.util.Objects;
 
 @Entity
@@ -10,7 +11,10 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotEmpty
     private String name;
+
+    @NotEmpty
     private String password;
 
     public static Person of (String name) {

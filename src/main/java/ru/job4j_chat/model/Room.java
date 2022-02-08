@@ -3,6 +3,7 @@ package ru.job4j_chat.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotEmpty
     private String description;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "room")

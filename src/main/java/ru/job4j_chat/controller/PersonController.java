@@ -2,6 +2,7 @@ package ru.job4j_chat.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j_chat.model.Person;
@@ -14,6 +15,11 @@ import java.util.stream.StreamSupport;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
+
+@Validated
 @RestController
 @RequestMapping("/person")
 public class PersonController {
@@ -27,7 +33,7 @@ public class PersonController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Person> create(@RequestParam String name) {
+    public ResponseEntity<Person> create(@NotEmpty @RequestParam String name) {
         if (name == null) {
             throw new NullPointerException("Name must not be empty");
         }
@@ -38,7 +44,8 @@ public class PersonController {
     }
 
     @PostMapping("/sign-up")
-    public void signUp(@RequestParam String name, @RequestParam String password) {
+    public void signUp(@NotEmpty @RequestParam String name,
+                       @NotEmpty @RequestParam String password) {
         if (name == null || password == null) {
             throw new NullPointerException("Name or password must not be empty");
         }
@@ -55,7 +62,7 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public Person findById(@PathVariable int id) {
+    public Person findById(@Positive @PathVariable int id) {
         return this.persons.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Person not found, please check its id"
@@ -63,7 +70,8 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@RequestParam String newName, @PathVariable int id) {
+    public ResponseEntity<Void> update(@NotEmpty @RequestParam String newName,
+                                       @Positive @PathVariable int id) {
         if (newName == null || id == 0) {
             throw new NullPointerException("NewName or personId must not be empty or 0");
         }
@@ -79,7 +87,7 @@ public class PersonController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<Void> delete(@Positive @PathVariable int id) {
         if (id == 0) {
             throw new NullPointerException("PersonId must not be 0");
         }
@@ -87,5 +95,13 @@ public class PersonController {
         person.setId(id);
         this.persons.delete(person);
         return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>(
+                "not valid due to validation error: " + e.getMessage(), HttpStatus.BAD_REQUEST
+        );
     }
 }

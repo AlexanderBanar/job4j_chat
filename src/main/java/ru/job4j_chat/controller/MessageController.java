@@ -3,6 +3,7 @@ package ru.job4j_chat.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j_chat.model.Message;
@@ -14,17 +15,18 @@ import ru.job4j_chat.repository.RoomRepo;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
+@Validated
 @RestController
 @RequestMapping("/message")
 public class MessageController {
@@ -42,8 +44,9 @@ public class MessageController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Message> create(@RequestParam String text, @RequestParam int personId,
-                                          @RequestParam int roomId) {
+    public ResponseEntity<Message> create(@NotEmpty @RequestParam String text,
+                                          @Positive @RequestParam int personId,
+                                          @Positive @RequestParam int roomId) {
         if (text == null || personId == 0 || roomId == 0) {
             throw new NullPointerException("Text or personId or roomId must not be empty or 0");
         }
@@ -72,7 +75,7 @@ public class MessageController {
     }
 
     @GetMapping("/{id}")
-    public Message findById(@PathVariable int id) {
+    public Message findById(@Positive @PathVariable int id) {
         return this.messages.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Message not found, please check its id"
@@ -80,7 +83,8 @@ public class MessageController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(@RequestParam String newText, @PathVariable int id) {
+    public ResponseEntity<Void> update(@NotEmpty @RequestParam String newText,
+                                       @Positive @PathVariable int id) {
         if (newText == null || id == 0) {
             throw new NullPointerException("NewText or messageId must not be empty or 0");
         }
@@ -95,7 +99,8 @@ public class MessageController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> patch(@RequestBody Message message, @PathVariable int id) {
+    public ResponseEntity<Void> patch(@Valid @RequestBody Message message,
+                                      @Positive @PathVariable int id) {
         Message messagePatched;
         Person updatedPerson;
         Room updatedRoom;
@@ -133,7 +138,7 @@ public class MessageController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<Void> delete(@Positive @PathVariable int id) {
         Message message = new Message();
         message.setId(id);
         this.messages.delete(message);
@@ -149,5 +154,13 @@ public class MessageController {
             put("message", e.getMessage());
             put("type", e.getClass());
         }}));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>(
+                "not valid due to validation error: " + e.getMessage(), HttpStatus.BAD_REQUEST
+        );
     }
 }

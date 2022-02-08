@@ -3,6 +3,7 @@ package ru.job4j_chat.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.util.Objects;
 
 @Entity
@@ -12,6 +13,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotEmpty
     private String text;
 
     @OneToOne(cascade = CascadeType.ALL)
