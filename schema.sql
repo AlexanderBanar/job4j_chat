@@ -1,8 +1,7 @@
-create database chat;
-
 create table persons(
                         id serial primary key,
-                        name varchar
+                        name varchar,
+                        password varchar
 );
 
 create table rooms(
@@ -17,8 +16,3 @@ create table messages(
                          person_id int references persons(id),
                          room_id int references rooms(id)
 );
-
-alter table persons add column password varchar;
-delete from messages;
-delete from rooms;
-delete from persons;
