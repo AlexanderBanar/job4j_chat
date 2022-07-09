@@ -75,3 +75,12 @@ separate path variables (not complete models) that in case of fail throw Constra
 is caught at class level (of each controller) with response status modification to HTTP 400 (as by default there will 
 be HTTP 500) as well as body modification.
 
+Docker <br />
+The app is already "dockerized" having Dockerfile and docker-compose.yml to run the app and database
+in containers. You need to have Docker installed on your machine. Follow these steps to run the app: <br />
+1. clone the project (using "git clone http..." command) <br />
+2. build the jar file of the project by "mvn install" command in the project's folder <br />
+3. once the jar is build now you may build the docker image of the application by "docker build -t chat ." command <br />
+4. run the command "docker-compose up" to run the application <br />
+5. now the app should be running at your localhost:80 port <br />
+6. to shut down the app simply run the command "docker-compose down" <br />
