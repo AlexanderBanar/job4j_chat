@@ -84,3 +84,13 @@ in containers. You need to have Docker installed on your machine. Follow these s
 4. run the command "docker-compose up" to run the application <br />
 5. now the app should be running at your localhost:80 port <br />
 6. to shut down the app simply run the command "docker-compose down" <br />
+
+Kubernetes <br />
+Additionally, you may run the app in K8s mono cluster. You should have K8s installed. Run these commands from k8s 
+folder: <br />
+1. kubectl apply -f postgresdb-secret.yml    (to create secret from *secret.yml file) <br />
+2. kubectl apply -f postgresdb-configmap.yml    (to run config with DB name and URL) <br />
+3. kubectl apply -f postgresdb-deployment.yml    (to deploy Postgres) <br />
+4. kubectl apply -f spring-boot-deployment.yml    (to deploy the app itself) <br />
+5. minikube service spring-boot-service    (to get the URl of the deployed app with further usage) <br />
+
